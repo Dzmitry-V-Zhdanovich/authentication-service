@@ -21,7 +21,6 @@ public class CreateUserInUserServiceResponse {
     private String surname;
     private LocalDate birthDate;
     private String email;
-    //private String role;
     private boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
