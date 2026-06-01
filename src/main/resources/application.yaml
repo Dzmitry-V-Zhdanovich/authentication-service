@@ -32,17 +32,6 @@ spring:
     default-schema: public
     contexts: development
 
-  jwt:
-    secret: "mySuperSecretKeyForJWTGenerationThatIsLongEnoughForHS256AndMoreSecure12345"
-    access:
-      expiration: 900000  # 15 минут
-    refresh:
-      expiration: 604800000
-
-  user:
-    service:
-      url: http://localhost:8081
-
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -57,6 +46,17 @@ spring:
 
   cache:
     type: none
+
+jwt:
+  secret: "mySuperSecretKeyForJWTGenerationThatIsLongEnoughForHS256AndMoreSecure12345"
+  access:
+    expiration: 900000  # 15 minutes
+  refresh:
+    expiration: 604800000  # 7 days
+
+user:
+  service:
+    url: http://localhost:8081
 
 server:
   port: 8082
