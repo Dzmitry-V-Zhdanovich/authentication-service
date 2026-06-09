@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
@@ -103,6 +104,7 @@ public class AuthServiceUnitTest {
 
         mockServer.expect(requestTo(userServiceUrl + "/api/v1/users"))
                 .andExpect(method(HttpMethod.POST))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer " + expectedToken))
                 .andRespond(withSuccess(mockResponseJson, MediaType.APPLICATION_JSON));
 
         doThrow(new RuntimeException("Database connection timeout"))
@@ -118,7 +120,7 @@ public class AuthServiceUnitTest {
                 .isInstanceOf(UserServiceException.class)
                 .hasMessageContaining("Registration failed due to internal error");
 
-        verify(jwtService).generateServiceToken();
+        verify(jwtService, times(2)).generateServiceToken();
 
         mockServer.verify();
     }

@@ -72,9 +72,12 @@ public class AuthServiceImpl implements AuthService {
     private CreateUserInUserServiceResponse callUserService(RegisterUserRequest request) {
         CreateUserInUserServiceRequest createUserRequest = userMapper.toCreateUserRequest(request);
         try {
+            String serviceToken = jwtService.generateServiceToken();
+
             return restClient.post()
                     .uri(userServiceUrl + "/api/v1/users")
                     .contentType(MediaType.APPLICATION_JSON)
+                    .headers(headers -> headers.setBearerAuth(serviceToken))
                     .body(createUserRequest)
                     .retrieve()
                     .body(CreateUserInUserServiceResponse.class);
