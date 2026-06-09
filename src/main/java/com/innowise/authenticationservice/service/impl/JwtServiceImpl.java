@@ -1,5 +1,6 @@
 package com.innowise.authenticationservice.service.impl;
 
+import com.innowise.authenticationservice.config.JwtConfig;
 import com.innowise.authenticationservice.exception.CustomSecurityException;
 import com.innowise.authenticationservice.model.Role;
 import com.innowise.authenticationservice.service.JwtService;
@@ -8,8 +9,8 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -20,22 +21,15 @@ import java.util.UUID;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
 
-    @Value("${jwt.secret}")
-    private String secret;
-
-    @Value("${jwt.access.expiration}")
-    private long accessExpiration;
-
-    @Value("${jwt.refresh.expiration}")
-    private long refreshExpiration;
-
+    private final JwtConfig jwtConfig;
     private SecretKey signKey;
 
     @PostConstruct
     public void init() {
-        this.signKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.signKey = Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
@@ -45,17 +39,30 @@ public class JwtServiceImpl implements JwtService {
                 .claim("userId", userId)
                 .claim("role", role.name())
                 .issuedAt(Date.from(Instant.now()))
-                .expiration(Date.from(Instant.now().plusMillis(accessExpiration)))
+                .expiration(Date.from(Instant.now().plusMillis(jwtConfig.getAccess().getExpiration())))
                 .signWith(signKey)
                 .compact();
     }
 
     @Override
-    public String generateRefreshToken(String login) {
+    public String generateServiceToken() {
+        return Jwts.builder()
+                .subject("AuthService")
+                .claim("role", "ROLE_SERVICE")
+                .issuedAt(Date.from(Instant.now()))
+                .expiration(Date.from(Instant.now().plusMillis(60000)))
+                .signWith(signKey)
+                .compact();
+    }
+
+    @Override
+    public String generateRefreshToken(String login, UUID userId, Role role) {
         return Jwts.builder()
                 .subject(login)
+                .claim("userId", userId)
+                .claim("role", role.name())
                 .issuedAt(Date.from(Instant.now()))
-                .expiration(Date.from(Instant.now().plusMillis(refreshExpiration)))
+                .expiration(Date.from(Instant.now().plusMillis(jwtConfig.getRefresh().getExpiration())))
                 .signWith(signKey)
                 .compact();
     }

@@ -3,6 +3,8 @@ package com.innowise.authenticationservice.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,7 +35,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(CustomSecurityException.class)
-    public ResponseEntity<ErrorResponse> handleSecurityException(CustomSecurityException ex, WebRequest request) {
+    public ResponseEntity<ErrorResponse> handleCustomSecurityException(CustomSecurityException ex, WebRequest request) {
         log.warn("Security exception: {}", ex.getMessage());
 
         ErrorResponse error = ErrorResponse.builder()
@@ -45,6 +47,36 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex, WebRequest request) {
+        log.warn("Spring Security authentication failure: {}", ex.getMessage());
+
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .error("UNAUTHORIZED")
+                .message("Authentication failed: " + ex.getMessage())
+                .path(request.getDescription(false))
+                .build();
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
+        log.warn("Access denied: {}", ex.getMessage());
+
+        ErrorResponse error = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.FORBIDDEN.value())
+                .error("FORBIDDEN")
+                .message("Access denied: " + ex.getMessage())
+                .path(request.getDescription(false))
+                .build();
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     @ExceptionHandler(UserServiceException.class)

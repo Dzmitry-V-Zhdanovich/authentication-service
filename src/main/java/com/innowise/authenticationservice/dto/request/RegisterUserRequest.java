@@ -1,5 +1,6 @@
 package com.innowise.authenticationservice.dto.request;
 
+import com.innowise.authenticationservice.model.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -41,5 +42,5 @@ public class RegisterUserRequest {
     private String email;
 
     @NotNull(message = "Role is required")
-    private String role;
+    private Role role;
 }

@@ -18,7 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +54,7 @@ public class CredentialServiceUnitTest {
                 .lastName("Doe")
                 .birthDate(LocalDate.of(2000, 1, 1))
                 .email("john.doe@example.com")
-                .role("user")
+                .role(Role.ROLE_USER)
                 .build();
         testCredential = Credential.builder()
                 .login(validRequest.getLogin())
@@ -71,7 +70,7 @@ public class CredentialServiceUnitTest {
         // Given
         when(passwordEncoder.encode(validRequest.getPassword())).thenReturn(encodedPassword);
         when(credentialMapper.toEntity(
-                validRequest.getLogin(),
+                validRequest,
                 testUserId,
                 encodedPassword,
                 Role.ROLE_USER
@@ -84,30 +83,11 @@ public class CredentialServiceUnitTest {
         // Then
         verify(passwordEncoder).encode(validRequest.getPassword());
         verify(credentialMapper).toEntity(
-                validRequest.getLogin(),
+                validRequest,
                 testUserId,
                 encodedPassword,
                 Role.ROLE_USER
         );
         verify(credentialRepository).save(testCredential);
-    }
-
-    @Test
-    @DisplayName("Should throw exception when role is invalid")
-    void shouldThrowExceptionWhenRoleIsInvalid() {
-        // Given
-        RegisterUserRequest invalidRoleRequest = RegisterUserRequest.builder()
-                .login("test")
-                .password("pass")
-                .firstName("John")
-                .lastName("Doe")
-                .birthDate(LocalDate.of(2000, 1, 1))
-                .email("test@example.com")
-                .role("INVALID_ROLE")
-                .build();
-
-        // When & Then
-        assertThatThrownBy(() -> credentialService.saveCredential(invalidRoleRequest, testUserId))
-                .isInstanceOf(IllegalArgumentException.class);
     }
 }

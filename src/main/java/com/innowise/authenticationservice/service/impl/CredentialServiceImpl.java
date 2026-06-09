@@ -28,15 +28,10 @@ public class CredentialServiceImpl implements CredentialService {
     public void saveCredential(RegisterUserRequest request, UUID userId) {
         log.info("Saving credentials for login: {}", request.getLogin());
 
-        Role role = Role.valueOf("ROLE_" + request.getRole().toUpperCase());
+        Role role = request.getRole();
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
-        Credential credential = credentialMapper.toEntity(
-                request.getLogin(),
-                userId,
-                encodedPassword,
-                role
-        );
+        Credential credential = credentialMapper.toEntity(request, userId, encodedPassword, role);
 
         credentialRepository.save(credential);
         log.info("Credentials saved successfully for user: {}", request.getLogin());

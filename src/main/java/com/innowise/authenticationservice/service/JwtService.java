@@ -8,7 +8,8 @@ import java.util.UUID;
 public interface JwtService {
 
     String generateAccessToken(String login, UUID userId, Role role);
-    String generateRefreshToken(String login);
+    String generateServiceToken();
+    String generateRefreshToken(String login, UUID userId, Role role);
     Claims validateToken(String token);
     UUID getUserIdFromToken(String token);
     String getRoleFromToken(String token);
