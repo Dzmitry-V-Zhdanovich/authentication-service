@@ -1,0 +1,37 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: Dmitry
+      labels: indexes
+      comment: "Add indexes for credentials table"
+      changes:
+        - createIndex:
+            indexName: idx_credentials_login
+            tableName: credentials
+            columns:
+              - column:
+                  name: login
+
+        - createIndex:
+            indexName: idx_credentials_user_id
+            tableName: credentials
+            columns:
+              - column:
+                  name: user_id
+
+        - createIndex:
+            indexName: idx_credentials_role
+            tableName: credentials
+            columns:
+              - column:
+                  name: role
+      rollback:
+        - dropIndex:
+            indexName: idx_credentials_login
+            tableName: credentials
+        - dropIndex:
+            indexName: idx_credentials_user_id
+            tableName: credentials
+        - dropIndex:
+            indexName: idx_credentials_role
+            tableName: credentials
